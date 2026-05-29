@@ -1056,6 +1056,13 @@ const typeKeywords = {
     EVENTS.length = 0;
     EVENTS.push(...deduped);
 
+    // Rebuild eventMap so renderCalendar sees the new events
+    for (const key in eventMap) delete eventMap[key];
+    EVENTS.forEach(e => {
+      if (!eventMap[e.date]) eventMap[e.date] = [];
+      eventMap[e.date].push(e);
+    });
+
     expandedDate = null;
     renderWeekPicker();
     renderCalendar();
