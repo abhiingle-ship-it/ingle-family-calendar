@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingle Family Calendar</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf0;
+    --muted: #7b82a0;
+    --accent: #6c8eff;
+    --travel: #5b9cf6;
+    --family: #52c97a;
+    --work: #f0a05a;
+    --special: #c084fc;
+    --weekend-bg: #161822;
+    --today-bg: #1e2540;
+    --today-border: #6c8eff;
+    --dallas: #52c97a;
+    --bayarea: #5b9cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sidebar-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .sidebar-header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .refresh-btn {
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-top-color: #fff;
+    border-left-color: #fff;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.25), -1px -1px 2px rgba(255,255,255,0.1);
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--text);
+    transition: transform 0.05s, box-shadow 0.05s;
+    flex-shrink: 0;
+  }
+
+  .refresh-btn:hover {
+    background: var(--border);
+  }
+
+  .refresh-btn:active {
+    transform: translateY(1px);
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.25), inset 1px 1px 3px rgba(0,0,0,0.15);
+    border-top-color: var(--border);
+    border-left-color: var(--border);
+  }
+
+  .sidebar-header p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .sidebar-section {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section h2 {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Week intention picker */
+  .week-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .week-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .week-picker-label {
+    font-size: 11px;
+    color: var(--text);
+    width: 70px;
+    flex-shrink: 0;
+  }
+
+  .week-btn {
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .week-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  .week-btn.active-dallas {
+    background: rgba(82, 201, 122, 0.15);
+    border-color: var(--dallas);
+    color: var(--dallas);
+  }
+
+  .week-btn.active-bay {
+    background: rgba(91, 156, 246, 0.15);
+    border-color: var(--bayarea);
+    color: var(--bayarea);
+  }
+
+  .week-num {
+    font-size: 10px;
+    color: var(--muted);
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Main calendar ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .month-nav button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .month-nav button:hover { background: var(--border); }
+
+  .month-title {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .month-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  .month-section {
+    margin-bottom: 6px;
+  }
+
+  .month-label-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .month-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .month-label-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    min-width: 580px;
+  }
+
+  .dow-header {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    padding: 4px 2px 8px;
+  }
+
+  /* Day cell — normal state */
+  .day-cell {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 6px 7px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 1px solid transparent;
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .day-cell:hover { background: var(--surface2); }
+
+  .day-cell.weekend { background: var(--weekend-bg); }
+
+  .day-cell.today {
+    border-color: var(--today-border);
+    background: var(--today-bg);
+  }
+
+  .day-cell.other-month { opacity: 0.25; }
+
+  /* Expanded state */
+  .day-cell.expanded {
+    position: relative;
+    z-index: 100;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    grid-column: span 7;
+    min-height: unset;
+    padding: 10px 14px;
+    cursor: default;
+  }
+
+  .day-cell.expanded .day-num { font-size: 14px; font-weight: 700; }
+
+  .day-num {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .day-cell.weekend .day-num { color: var(--muted); }
+  .day-cell.expanded.weekend .day-num { color: var(--text); }
+
+  .day-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+
+  .day-dot.travel { background: var(--travel); }
+  .day-dot.family { background: var(--family); }
+  .day-dot.work { background: var(--work); }
+  .day-dot.special { background: var(--special); }
+
+  .day-dot-overflow {
+    font-size: 8px;
+    color: var(--muted);
+    line-height: 5px;
+    padding-left: 1px;
+  }
+
+  .day-label {
+    font-size: 9px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 1px;
+  }
+
+  /* Expanded content */
+  .expanded-date {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .expanded-event {
+    margin-bottom: 8px;
+  }
+
+  .expanded-event-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .expanded-event-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .expanded-event-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 4px;
+  }
+
+  .tag-travel { background: rgba(91,156,246,0.2); color: var(--travel); }
+  .tag-family { background: rgba(82,201,122,0.2); color: var(--family); }
+  .tag-work { background: rgba(240,160,90,0.2); color: var(--work); }
+  .tag-special { background: rgba(192,132,252,0.2); color: var(--special); }
+
+  .expanded-intention {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .expanded-intention.dallas { color: var(--dallas); }
+  .expanded-intention.bay { color: var(--bayarea); }
+
+  .expanded-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: var(--border);
+    border: none;
+    color: var(--muted);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+  }
+
+  .expanded-close:hover { background: var(--muted); color: var(--text); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; min-width: unset; height: auto; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .main { height: calc(100vh - 40vh); }
+    .day-cell.expanded { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title-row">
+        <h1>Ingle Family Calendar</h1>
+        <button class="refresh-btn" onclick="refreshEvents()" title="Refresh from Google Doc">&#8635;</button>
+      </div>
+      <p>2025 – 2027</p>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>Legend</h2>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--travel)"></span> Travel</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--family)"></span> Family / Personal</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--work)"></span> Work / Conference</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--special)"></span> Special Event</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>Week Intentions</h2>
+      <div class="week-picker" id="weekPicker"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="calendar-header">
+      <div class="month-nav">
+        <button onclick="scrollByMonths(-1)">&#8592;</button>
+        <div class="month-title" id="monthTitle"></div>
+        <button onclick="scrollByMonths(1)">&#8594;</button>
+      </div>
+    </div>
+    <div class="month-grid" id="monthGrid"></div>
+  </div>
+</div>
+
+<script>
+const EVENTS = [
+  // 2025
+  { date: "2025-09-25", title: "SambaNova Board Meeting", type: "work", desc: "Palo Alto. CAB meeting 8:30am–4:15pm." },
+  { date: "2025-09-26", title: "SambaNova Board Meeting – Day 2", type: "work", desc: "Palo Alto. Evening: meeting with Levo.ai in Dallas." },
+  { date: "2025-09-27", title: "Elon Family Weekend", type: "family", desc: "Fly 8:09am DFW → Greensboro 11:56am. Hyatt Place Greensboro. Convocation with Arthur Brooks." },
+  { date: "2025-09-28", title: "Elon Family Weekend", type: "family", desc: "Optional academic sessions 10am–12pm, football game 2pm, Rockapella show 8:30pm." },
+  { date: "2025-09-29", title: "Return Home + Evening Event", type: "travel", desc: "6:57am flight DFW, land 9:06am. 6pm: Suman & Tanya Chepuri's house, The Colony." },
+  { date: "2025-10-09", title: "Nina & Abhi Arrive", type: "family", desc: "Nina lands 6pm (Molly picks up). Abhi lands 10:30pm." },
+  { date: "2025-10-12", title: "Molly Departs for Seattle Hike", type: "travel", desc: "7am flight to SEA. Abhi drops her off. Hike Oct 13–16." },
+  { date: "2025-10-14", title: "Lake House", type: "family", desc: "Return from lake house with Tim for dinner." },
+  { date: "2025-10-31", title: "Hemmadis Arrive", type: "family", desc: "Land at 1:40pm. Fly home Nov 8. Diwali dinner at home." },
+  { date: "2025-11-03", title: "Belize Trip", type: "travel", desc: "Departs 12:19pm, returns 4:30pm Nov 7." },
+  { date: "2025-11-17", title: "ICAI Conference – Abhi Speaking", type: "work", desc: "Hyatt Frisco. Presentation 2–2:30pm, Panel 2:45–3:30pm." },
+  { date: "2025-11-18", title: "Abhi Speaks to Nina's Elon Class", type: "work", desc: "11:35am–12:35pm CST with Drew Peabody." },
+  { date: "2025-11-19", title: "Breakfast with David Evans & Copps", type: "work", desc: "7:30–10pm panel at Renaissance Dallas." },
+  { date: "2025-12-01", title: "Bay Area Week Starts", type: "travel", desc: "Nina 11am flight, Abhi 11:40am. Stay at Rajiv's Sunday night." },
+  { date: "2025-12-02", title: "Functional Readouts – People & Finance", type: "work", desc: "Early morning readout. Product & Engineering readout." },
+  { date: "2025-12-03", title: "Aramco Presentation", type: "work", desc: "Presenting in Bay Area to Aramco." },
+  { date: "2025-12-05", title: "All Hands – Palo Alto", type: "work", desc: "All Hands in Palo Alto." },
+  { date: "2025-12-09", title: "DC Trip – Federal Dinner", type: "travel", desc: "Fly American to DC. Sambanova Federal dinner in DC – evening." },
+  { date: "2025-12-10", title: "Sambanova Federal Summit", type: "work", desc: "DC. Fly to Houston evening." },
+  { date: "2025-12-11", title: "Houston – Board Dinner", type: "work", desc: "Evening board dinner. Morae board meeting in person." },
+  { date: "2025-12-12", title: "Morae Board Meeting", type: "work", desc: "In person in Houston. Fly to Dallas." },
+  { date: "2025-12-15", title: "SambaNova Executive Offsite", type: "work", desc: "Sunday evening flight. Offsite Mon & Tue." },
+  { date: "2026-01-05", title: "Tahoe Ski Trip", type: "travel", desc: "9am flight, land 10:38am PST. 1.5hr drive to Tahoe. Marriott Timber Lodge Jan 5–8." },
+  { date: "2026-01-20", title: "Bay Area Trip", type: "travel", desc: "9:15am flight. To Toronto Jan 23, land DFW 1/24 8pm." },
+  { date: "2026-02-14", title: "Lake House with Molly", type: "family", desc: "Scullions lake house Feb 14–15." },
+  { date: "2026-02-16", title: "SambaNova Holidays", type: "work", desc: "Feb 16–17 are SambaNova holidays. Good time for PT." },
+  { date: "2026-02-22", title: "NYC Week", type: "travel", desc: "Abhi to be in NYC this week." },
+  { date: "2026-03-27", title: "CNEXT Executive Dinner", type: "work", desc: "NYC. Beauty & Essex, 6–9pm ET." },
+  { date: "2026-03-27", title: "SambaNova Offsite", type: "work", desc: "Thursday. March 27–31." },
+  { date: "2026-04-04", title: "Abhi Flies Mumbai → Kathmandu", type: "travel", desc: "April 4th." },
+  { date: "2026-04-10", title: "Alli & Amy Visit Dallas", type: "family", desc: "April 10–12." },
+  { date: "2026-04-14", title: "Return: Kathmandu → Mumbai", type: "travel", desc: "Fly back April 14." },
+  { date: "2026-04-20", title: "Molly's Birthday", type: "special", desc: "April 20." },
+  { date: "2026-05-01", title: "Beth's Surgery", type: "special", desc: "Currently scheduled for May 1." },
+  { date: "2026-05-01", title: "Molly in Newport", type: "family", desc: "Molly in Newport end of April and first week of May." },
+  { date: "2026-05-05", title: "Middle East Trip Begins", type: "travel", desc: "Abhi likely in Middle East: 5th/6th through 14th." },
+  { date: "2026-05-11", title: "AI Everything Global – Abu Dhabi", type: "work", desc: "Speaking engagement, Abu Dhabi May 11–13. Must be home by 15th." },
+  { date: "2026-05-16", title: "Ravi Graduation Day", type: "special", desc: "Graduation. Airbnb reserved May 16–19." },
+  { date: "2026-05-28", title: "Abhi Flies to Bay Area", type: "travel", desc: "Abhi to Bay Area May 28. Molly flies in May 29." },
+  { date: "2026-06-03", title: "Molly Needs Hotel", type: "family", desc: "Molly will need a hotel room night of June 3rd." },
+  { date: "2026-06-08", title: "Molly Flies Back", type: "travel", desc: "Molly flies back June 8." },
+  { date: "2026-06-15", title: "Abhi Flies Back", type: "travel", desc: "Abhi flies back likely 15th or 16th of June." },
+  { date: "2026-06-15", title: "Ravi Gets Back to Dallas", type: "family", desc: "Ravi gets back to Dallas on June 15th (Monday) in the evening." },
+  { date: "2026-06-18", title: "Austin Trip", type: "travel", desc: "Leave for Austin June 18 (Thursday). Return Sunday night June 21." },
+  { date: "2026-06-22", title: "Ravi Starts Work", type: "work", desc: "Ravi starts work June 22 – Monday." },
+  { date: "2026-07-06", title: "France Trip", type: "travel", desc: "Abhi likely in France July 6th to 9th." },
+  { date: "2026-07-24", title: "Depart for London – UK Trip", type: "travel", desc: "DFW 5:45pm flight, land London 9am July 25 (Saturday)." },
+  { date: "2026-07-25", title: "Sushama's 60th + Papa's 90th Birthday", type: "special", desc: "July 25–28 celebrations in UK." },
+  { date: "2026-08-03", title: "Return from London", type: "travel", desc: "9am flight, land DFW 1pm Monday August 3rd." },
+  { date: "2026-08-15", title: "Nina Flies Home", type: "family", desc: "Nina flies home weekend of August 15th." },
+  { date: "2026-08-24", title: "Nina Classes Start", type: "special", desc: "Nina classes start August 24." },
+  { date: "2026-09-25", title: "Elon Family Weekend", type: "family", desc: "Friday Sept 25 through Sunday Sept 27." },
+  { date: "2026-10-14", title: "Elon Fall Break", type: "family", desc: "Begins after evening classes Oct 14. Ends 8am Oct 19." },
+  { date: "2026-11-20", title: "Thanksgiving Break", type: "family", desc: "Begins after evening classes Nov 20. Ends 8am Nov 30." },
+  { date: "2026-12-07", title: "Nina's Exams", type: "special", desc: "Dec 7–11 are Nina's exams." },
+  { date: "2026-12-12", title: "Nina May Come Home", type: "family", desc: "Nina may come home after Dec 12." },
+  { date: "2027-04-09", title: "Eastern Europe Trip", type: "travel", desc: "Out for Eastern European trip April 9–25." },
+  { date: "2027-07-25", title: "Sushama's Birthday", type: "special", desc: "July 25th–28th." },
+];
+
+const eventMap = {};
+EVENTS.forEach(e => {
+  if (!eventMap[e.date]) eventMap[e.date] = [];
+  eventMap[e.date].push(e);
+});
+
+let currentBaseDate = new Date(2026, 0, 1);
+let expandedDate = null;
+
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+
+function getWeekIntention(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const weekNum = getWeekNumber(d);
+  const key = `${d.getFullYear()}-W${String(weekNum).padStart(2,'0')}`;
+  return weekIntentions[key] || "";
+}
+
+let weekIntentions = {};
+
+function renderWeekPicker() {
+  const container = document.getElementById("weekPicker");
+  const start = new Date(currentBaseDate);
+  start.setDate(1);
+  const day = start.getDay();
+  start.setDate(start.getDate() - day);
+
+  container.innerHTML = "";
+  for (let i = 0; i < 16; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i * 7);
+    const weekNum = getWeekNumber(d);
+    const key = `${d.getFullYear()}-W${String(weekNum).padStart(2,'0')}`;
+    const label = `${MONTH_NAMES[d.getMonth()].slice(0,3)} ${d.getDate()}`;
+    const val = weekIntentions[key] || "";
+
+    const row = document.createElement("div");
+    row.className = "week-picker-row";
+    row.innerHTML = `
+      <span class="week-num">W${weekNum}</span>
+      <span class="week-picker-label">${label}</span>
+      <button class="week-btn ${val === 'dallas' ? 'active-dallas' : ''}" onclick="setWeekIntention('${key}', 'dallas', this)">Dallas</button>
+      <button class="week-btn ${val === 'bay' ? 'active-bay' : ''}" onclick="setWeekIntention('${key}', 'bay', this)">Bay Area</button>
+    `;
+    container.appendChild(row);
+  }
+}
+
+function setWeekIntention(key, val, btn) {
+  const parent = btn.parentElement;
+  const btns = parent.querySelectorAll(".week-btn");
+  if (weekIntentions[key] === val) {
+    weekIntentions[key] = "";
+    btns.forEach(b => { b.classList.remove("active-dallas","active-bay"); });
+  } else {
+    weekIntentions[key] = val;
+    btns.forEach(b => { b.classList.remove("active-dallas","active-bay"); });
+    btn.classList.add(val === "dallas" ? "active-dallas" : "active-bay");
+  }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById("monthGrid");
+  const title = document.getElementById("monthTitle");
+  title.textContent = `${MONTH_NAMES[currentBaseDate.getMonth()]} ${currentBaseDate.getFullYear()}`;
+
+  grid.innerHTML = "";
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  for (let m = 0; m < 18; m++) {
+    const d = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + m, 1);
+    if (d.getFullYear() > 2027) break;
+    if (d.getFullYear() < 2025) { continue; }
+
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const monthName = `${MONTH_NAMES[month]} ${year}`;
+
+    const section = document.createElement("div");
+    section.className = "month-section";
+
+    const labelRow = document.createElement("div");
+    labelRow.className = "month-label-row";
+    labelRow.innerHTML = `<span class="month-label">${monthName}</span><div class="month-label-line"></div>`;
+    section.appendChild(labelRow);
+
+    const dowRow = document.createElement("div");
+    dowRow.className = "cal-grid";
+    DOW.forEach(dow => {
+      const h = document.createElement("div");
+      h.className = "dow-header";
+      h.textContent = dow;
+      dowRow.appendChild(h);
+    });
+    section.appendChild(dowRow);
+
+    const calGrid = document.createElement("div");
+    calGrid.className = "cal-grid";
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const cell = makeCell(year, month - 1, daysInPrevMonth - i, true, todayStr);
+      calGrid.appendChild(cell);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cell = makeCell(year, month, day, false, todayStr);
+      calGrid.appendChild(cell);
+    }
+
+    const totalCells = firstDay + daysInMonth;
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let day = 1; day <= remaining; day++) {
+      const cell = makeCell(year, month + 1, day, true, todayStr);
+      calGrid.appendChild(cell);
+    }
+
+    section.appendChild(calGrid);
+    grid.appendChild(section);
+  }
+}
+
+function makeCell(year, month, day, other, todayStr) {
+  const cell = document.createElement("div");
+  // Fix month underflow/overflow for adjacent month filler cells
+  let dispYear = year;
+  let dispMonth = month; // 0-indexed internally
+  if (month < 0) { dispYear--; dispMonth = 11; }
+  else if (month > 11) { dispYear++; dispMonth = 0; }
+  const dateStr = `${dispYear}-${String(dispMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const dow = new Date(year, month, day).getDay();
+  const isWeekend = dow === 0 || dow === 6;
+  const isToday = dateStr === todayStr;
+  const isExpanded = dateStr === expandedDate;
+  const evs = eventMap[dateStr] || [];
+  const intention = getWeekIntention(dateStr);
+
+  cell.className = "day-cell";
+  cell.dataset.date = dateStr;
+  if (other) cell.classList.add("other-month");
+  if (isWeekend) cell.classList.add("weekend");
+  if (isToday) cell.classList.add("today");
+  if (isExpanded) cell.classList.add("expanded");
+
+  if (isExpanded) {
+    const d = new Date(dateStr + "T00:00:00");
+    let content = `<div class="expanded-date">${d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}</div>`;
+
+    if (evs.length > 0) {
+      evs.forEach(ev => {
+        const tagClass = `tag-${ev.type}`;
+        const tagLabel = ev.type.charAt(0).toUpperCase() + ev.type.slice(1);
+        content += `
+          <div class="expanded-event">
+            <div class="expanded-event-title">${ev.title}</div>
+            <span class="expanded-event-tag ${tagClass}">${tagLabel}</span>
+            <div class="expanded-event-desc">${ev.desc}</div>
+          </div>
+        `;
+      });
+    }
+
+    if (intention) {
+      const label = intention === "dallas" ? "Be in Dallas this week" : "Be in Bay Area this week";
+      content += `<div class="expanded-intention ${intention}">${label}</div>`;
+    }
+
+    if (evs.length === 0 && !intention) {
+      content += `<div class="expanded-event-desc">No events or intentions for this day.</div>`;
+    }
+
+    content += `<button class="expanded-close" onclick="event.stopPropagation(); collapse()">×</button>`;
+
+    cell.innerHTML = content;
+  } else {
+    let dotsHtml = "";
+    if (evs.length > 0) {
+      const maxDots = 3;
+      const dotsToShow = evs.slice(0, maxDots);
+      dotsHtml = '<div class="day-dots">' + dotsToShow.map(e => `<div class="day-dot ${e.type}"></div>`).join('') + (evs.length > maxDots ? `<div class="day-dot-overflow">+${evs.length - maxDots}</div>` : '') + '</div>';
+    }
+
+    let labelHtml = "";
+    if (intention) {
+      const color = intention === "dallas" ? "var(--dallas)" : "var(--bayarea)";
+      const label = intention === "dallas" ? "Be in Dallas" : "Be in Bay Area";
+      labelHtml = `<div class="day-label" style="color:${color}">${label}</div>`;
+    }
+
+    cell.innerHTML = `
+      <div class="day-num">${day}</div>
+      ${dotsHtml}
+      ${labelHtml}
+    `;
+  }
+
+  return cell;
+}
+
+// Event delegation — single listener on the grid container
+function setupDayCellEvents() {
+  const monthGrid = document.getElementById("monthGrid");
+  monthGrid.addEventListener("click", (e) => {
+    const cell = e.target.closest(".day-cell");
+    if (!cell || cell.classList.contains("expanded")) return;
+
+    const dateStr = cell.dataset.date;
+    if (!dateStr) return;
+
+    e.stopPropagation(); // prevent document click listener from firing
+
+    if (expandedDate === dateStr) {
+      collapse();
+    } else {
+      expandedDate = dateStr;
+      renderCalendar();
+      setTimeout(() => {
+        const el = document.querySelector(".day-cell.expanded");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 50);
+    }
+  });
+}
+
+function expandTo(dateStr) {
+  if (expandedDate === dateStr) {
+    collapse();
+    return;
+  }
+  expandedDate = dateStr;
+  renderCalendar();
+  setTimeout(() => {
+    const el = document.querySelector(".day-cell.expanded");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, 50);
+}
+
+function collapse() {
+  expandedDate = null;
+  renderCalendar();
+}
+
+// Close on outside click
+document.addEventListener("click", (e) => {
+  if (expandedDate && !e.target.closest(".day-cell.expanded") && !e.target.closest(".week-btn")) {
+    collapse();
+  }
+});
+
+function scrollByMonths(delta) {
+  currentBaseDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + delta, 1);
+  expandedDate = null;
+  renderWeekPicker();
+  renderCalendar();
+  document.querySelector(".month-grid").scrollTop = 0;
+}
+
+// Init
+renderWeekPicker();
+renderCalendar();
+setupDayCellEvents();
+
+async function refreshEvents() {
+  const btn = document.querySelector(".refresh-btn");
+  if (btn) {
+    btn.textContent = "…";
+    btn.disabled = true;
+  }
+  try {
+    const docUrl = "https://docs.google.com/document/d/1PfIo4MLSQ2m1Amwf-2GWW-hk6k9H4nk5ohMsGWYX04o/export?format=txt";
+    const res = await fetch(docUrl);
+    if (!res.ok) throw new Error("Fetch failed: " + res.status);
+    const text = await res.text();
+
+    const newEvents = [];
+    const monthMap = {
+      january:0,february:1,march:2,april:3,may:4,june:5,
+      july:6,august:7,september:8,october:9,november:10,december:11
+    };
+    const typeKeywords = {
+      travel: ["fly", "flight", "arrive", "land", "depart", "leaves", "trip", "drive", "travel", "austin", "bay area", "dfw", "sf0", "lax", "sea", "houston", "indy", "mumbai", "kolkata", "london", "france", "belize", "tahoe", "dubai", "abu dhabi"],
+      work: ["sambanova", "board", "meeting", "conference", "presentation", "executive", "speaking", "panel", "offsite", "readout", "summit", "hackathon", "class", "elOn", "company", "work", "morae", "icri", "icai", "ravis", "ravis starts"],
+      family: ["family", "graduation", "birthday", "bday", "wedding", "dinner", "lake house", "kids", "nina", "ravi", "molly", "beth", "sushama", "papa", "benji", "home", "weekend", "patriots", "ingle", "husband", "wife", "son", "daughter"],
+      special: ["special", "surgery", "wedding", "celebration", "anniversary", "graduation", "holiday", "break"]
+    };
+
+    let curYear = null;
+    let curMonth = null;
+
+    const lines = text.split("\n");
+    const n = lines.length;
+
+    for (let i = 0; i < n; i++) {
+      const raw = lines[i].trim();
+      if (!raw || raw === "Shared Family Important Date" || raw.startsWith("===") || raw === "OLD STUFF BELOW") break;
+
+      // Month+Year header (e.g. "June 2026" or "September 2026")
+      const monthYearMatch = raw.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i);
+      if (monthYearMatch) {
+        curMonth = monthMap[monthYearMatch[1].toLowerCase()];
+        curYear = parseInt(monthYearMatch[2]);
+        continue;
+      }
+
+      if (!curYear || curMonth === null) continue;
+
+      // Blank line — skip
+      if (!raw) continue;
+
+      // Paragraph with a date in it — extract title
+      const datePat = /(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})|(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(January|February|March|April|May|June|July|August|September|October|November|December)|(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})(?:st|nd|rd|th)?/i;
+      const dateMatch = raw.match(datePat);
+      if (dateMatch) {
+        let day = null;
+        let year = curYear;
+
+        if (dateMatch[1] && dateMatch[2]) {
+          // "15, 2026" or "15th, 2026"
+          day = parseInt(dateMatch[1]);
+          year = parseInt(dateMatch[2]);
+        } else if (dateMatch[3] && dateMatch[4]) {
+          // "15 of June" or "15th of June"
+          day = parseInt(dateMatch[3]);
+          const m = monthMap[dateMatch[4].toLowerCase()];
+          if (m !== undefined) { curMonth = m; }
+        } else if (dateMatch[5] && dateMatch[6]) {
+          // "June 15" or "June 15th"
+          curMonth = monthMap[dateMatch[5].toLowerCase()];
+          day = parseInt(dateMatch[6]);
+        }
+
+        if (day !== null) {
+          // Collect following lines as description until blank or next date-bearing line
+          let descLines = [];
+          for (let j = i + 1; j < n; j++) {
+            const next = lines[j].trim();
+            if (!next) break;
+            const nm = next.match(datePat);
+            if (nm && nm[1] && nm[2]) { break; } // next line starts a new date
+            descLines.push(next);
+            i = j;
+          }
+          const desc = descLines.join(" ").replace(/\s+/g, " ").trim();
+
+          // Skip placeholder lines
+          if (desc.toLowerCase().includes("ljsdalkfjdsaljl") || desc.toLowerCase().includes("ljskl") || desc.toLowerCase() === "test" || desc.toLowerCase() === "placeholder") continue;
+          // Skip pure month/year lines
+          if (!desc || desc === String(day)) continue;
+
+          // Determine type
+          const lowerRaw = raw.toLowerCase();
+          let evType = "special";
+          let maxHits = 0;
+          for (const [type, words] of Object.entries(typeKeywords)) {
+            const hits = words.filter(w => lowerRaw.includes(w)).length;
+            if (hits > maxHits) { maxHits = hits; evType = type; }
+          }
+
+          const mm = String(curMonth + 1).padStart(2, "0");
+          const dd = String(day).padStart(2, "0");
+          const dateStr = `${year}-${mm}-${dd}`;
+
+          newEvents.push({ date: dateStr, title: raw, type: evType, desc });
+        }
+      }
+    }
+
+    // Deduplicate by date+title
+    const seen = new Set();
+    const deduped = newEvents.filter(ev => {
+      const key = ev.date + "|" + ev.title;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    EVENTS.length = 0;
+    EVENTS.push(...deduped);
+
+    expandedDate = null;
+    renderWeekPicker();
+    renderCalendar();
+    setupDayCellEvents();
+
+  } catch (err) {
+    alert("Failed to refresh: " + err.message);
+  } finally {
+    const btn = document.querySelector(".refresh-btn");
+    if (btn) {
+      btn.textContent = "\u21bb";
+      btn.disabled = false;
+    }
+  }
+}
+</script>
+</body>
+</html>
