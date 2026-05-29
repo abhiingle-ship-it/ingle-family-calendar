@@ -162,7 +162,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 14px;
     color: #fff;
     flex-shrink: 0;
   }
@@ -395,6 +395,15 @@
   .day-dot.special { background: var(--special); }
   .day-dot.extended { background: var(--extended); }
 
+  .day-member-icon {
+    font-size: 13px;
+    line-height: 1;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .day-dot-overflow {
     font-size: 8px;
     color: var(--muted);
@@ -420,6 +429,12 @@
 
   .expanded-event {
     margin-bottom: 8px;
+  }
+
+  .expanded-member-icon {
+    font-size: 18px;
+    margin-bottom: 2px;
+    line-height: 1;
   }
 
   .expanded-event-title {
@@ -510,19 +525,19 @@
       <h2>Family Members</h2>
       <div class="family-index">
         <div class="family-member">
-          <span class="family-avatar" style="background:var(--special)">A</span>
+          <span class="family-avatar" style="background:var(--travel)">🌀</span>
           <span class="family-info"><strong>Abhi</strong><br><span class="family-loc">Dallas</span></span>
         </div>
         <div class="family-member">
-          <span class="family-avatar" style="background:var(--special)">M</span>
+          <span class="family-avatar" style="background:var(--special)">👑</span>
           <span class="family-info"><strong>Molly</strong><br><span class="family-loc">Dallas</span></span>
         </div>
         <div class="family-member">
-          <span class="family-avatar" style="background:var(--special)">N</span>
+          <span class="family-avatar" style="background:var(--work)">🔥</span>
           <span class="family-info"><strong>Nina</strong><br><span class="family-loc">North Carolina</span></span>
         </div>
         <div class="family-member">
-          <span class="family-avatar" style="background:var(--special)">R</span>
+          <span class="family-avatar" style="background:var(--family)">😈</span>
           <span class="family-info"><strong>Ravi</strong><br><span class="family-loc">Austin</span></span>
         </div>
       </div>
@@ -787,8 +802,10 @@ function makeCell(year, month, day, other, todayStr) {
       evs.forEach(ev => {
         const tagClass = `tag-${ev.type}`;
         const tagLabel = ev.type.charAt(0).toUpperCase() + ev.type.slice(1);
+        const memberIcon = getEventMemberIcon(ev) || "";
         content += `
           <div class="expanded-event">
+            ${memberIcon ? `<div class="expanded-member-icon">${memberIcon}</div>` : ""}
             <div class="expanded-event-title">${ev.title}</div>
             <span class="expanded-event-tag ${tagClass}">${tagLabel}</span>
             <div class="expanded-event-desc">${ev.desc}</div>
@@ -812,9 +829,16 @@ function makeCell(year, month, day, other, todayStr) {
   } else {
     let dotsHtml = "";
     if (evs.length > 0) {
-      const maxDots = 3;
-      const dotsToShow = evs.slice(0, maxDots);
-      dotsHtml = '<div class="day-dots">' + dotsToShow.map(e => `<div class="day-dot ${e.type}"></div>`).join('') + (evs.length > maxDots ? `<div class="day-dot-overflow">+${evs.length - maxDots}</div>` : '') + '</div>';
+      // Check if any event features a family member — show their icon instead of dots
+      const featured = evs.find(e => getEventMemberIcon(e));
+      if (featured) {
+        const icon = getEventMemberIcon(featured);
+        dotsHtml = `<div class="day-member-icon">${icon}</div>`;
+      } else {
+        const maxDots = 3;
+        const dotsToShow = evs.slice(0, maxDots);
+        dotsHtml = '<div class="day-dots">' + dotsToShow.map(e => `<div class="day-dot ${e.type}"></div>`).join('') + (evs.length > maxDots ? `<div class="day-dot-overflow">+${evs.length - maxDots}</div>` : '') + '</div>';
+      }
     }
 
     let labelHtml = "";
@@ -832,6 +856,23 @@ function makeCell(year, month, day, other, todayStr) {
   }
 
   return cell;
+}
+
+// Family member icons for calendar display
+const FAMILY_MEMBER_ICONS = {
+  abhi: "🌀",
+  molly: "👑",
+  nina: "🔥",
+  ravi: "😈"
+};
+
+function getEventMemberIcon(ev) {
+  const text = (ev.title + " " + ev.desc).toLowerCase();
+  if (text.includes("abhi")) return FAMILY_MEMBER_ICONS.abhi;
+  if (text.includes("molly")) return FAMILY_MEMBER_ICONS.molly;
+  if (text.includes("nina")) return FAMILY_MEMBER_ICONS.nina;
+  if (text.includes("ravi")) return FAMILY_MEMBER_ICONS.ravi;
+  return null;
 }
 
 // Event delegation — single listener on the grid container
