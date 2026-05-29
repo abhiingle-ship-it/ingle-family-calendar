@@ -616,7 +616,8 @@ const EVENTS = [
   { date: "2026-05-28", title: "Abhi Flies to Bay Area", type: "travel", desc: "Abhi to Bay Area May 28. Molly flies in May 29." },
   { date: "2026-06-03", title: "Molly Needs Hotel", type: "family", desc: "Molly will need a hotel room night of June 3rd." },
   { date: "2026-06-08", title: "Molly Flies Back", type: "travel", desc: "Molly flies back June 8." },
-  { date: "2026-06-15", title: "Abhi Flies Back", type: "travel", desc: "Abhi flies back likely 15th or 16th of June." },
+  { date: "2026-06-15", title: "Abhi Has SambaNova Board Meeting", type: "work", desc: "Abhi has a SambaNova board meeting on the 15th of June." },
+  { date: "2026-06-15", title: "Abhi Flies Back", type: "travel", desc: "Abhi flies back likely in the evening of the 15th or the morning of the 16th of June." },
   { date: "2026-06-15", title: "Ravi Gets Back to Dallas", type: "family", desc: "Ravi gets back to Dallas on June 15th (Monday) in the evening." },
   { date: "2026-06-18", title: "Austin Trip", type: "travel", desc: "Leave for Austin June 18 (Thursday). Return Sunday night June 21." },
   { date: "2026-06-22", title: "Ravi Starts Work", type: "work", desc: "Ravi starts work June 22 – Monday." },
@@ -971,7 +972,12 @@ const typeKeywords = {
 
     for (let i = 0; i < n; i++) {
       const raw = lines[i].trim();
-      if (!raw || raw === "Shared Family Important Date" || raw.startsWith("===") || raw === "OLD STUFF BELOW") break;
+
+      // HARD STOP: Never process anything from or after the OLD STUFF section.
+      // This boundary is absolute — the OLD STUFF section contains placeholder
+      // entries (ljsdalkfjdsaljl, etc.) and old historical data that should
+      // NOT appear in the calendar under any circumstances.
+      if (!raw || raw === "Shared Family Important Date" || raw.startsWith("===") || raw === "OLD STUFF BELOW" || raw.toUpperCase().includes("OLD STUFF")) break;
 
       // Month+Year header (e.g. "June 2026" or "September 2026")
       const monthYearMatch = raw.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i);
