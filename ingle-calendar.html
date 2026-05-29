@@ -17,6 +17,7 @@
     --family: #52c97a;
     --work: #f0a05a;
     --special: #c084fc;
+  --extended: #f472b6;
     --weekend-bg: #161822;
     --today-bg: #1e2540;
     --today-border: #6c8eff;
@@ -137,6 +138,43 @@
     height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
+  }
+
+  /* Family members index */
+  .family-index {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .family-member {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 11px;
+  }
+
+  .family-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .family-info {
+    color: var(--text);
+    line-height: 1.35;
+  }
+
+  .family-loc {
+    color: var(--muted);
+    font-size: 10px;
   }
 
   /* Week intention picker */
@@ -355,6 +393,7 @@
   .day-dot.family { background: var(--family); }
   .day-dot.work { background: var(--work); }
   .day-dot.special { background: var(--special); }
+  .day-dot.extended { background: var(--extended); }
 
   .day-dot-overflow {
     font-size: 8px;
@@ -468,12 +507,35 @@
     </div>
 
     <div class="sidebar-section">
+      <h2>Family Members</h2>
+      <div class="family-index">
+        <div class="family-member">
+          <span class="family-avatar" style="background:var(--special)">A</span>
+          <span class="family-info"><strong>Abhi</strong><br><span class="family-loc">Dallas</span></span>
+        </div>
+        <div class="family-member">
+          <span class="family-avatar" style="background:var(--special)">M</span>
+          <span class="family-info"><strong>Molly</strong><br><span class="family-loc">Dallas</span></span>
+        </div>
+        <div class="family-member">
+          <span class="family-avatar" style="background:var(--special)">N</span>
+          <span class="family-info"><strong>Nina</strong><br><span class="family-loc">North Carolina</span></span>
+        </div>
+        <div class="family-member">
+          <span class="family-avatar" style="background:var(--special)">R</span>
+          <span class="family-info"><strong>Ravi</strong><br><span class="family-loc">Austin</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
       <h2>Legend</h2>
       <div class="legend">
         <div class="legend-item"><span class="legend-dot" style="background:var(--travel)"></span> Travel</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--family)"></span> Family / Personal</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--work)"></span> Work / Conference</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--special)"></span> Special Event</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--extended)"></span> Extended Family</div>
       </div>
     </div>
 
@@ -852,11 +914,12 @@ async function refreshEvents() {
       january:0,february:1,march:2,april:3,may:4,june:5,
       july:6,august:7,september:8,october:9,november:10,december:11
     };
-    const typeKeywords = {
+const typeKeywords = {
       travel: ["fly", "flight", "arrive", "land", "depart", "leaves", "trip", "drive", "travel", "austin", "bay area", "dfw", "sf0", "lax", "sea", "houston", "indy", "mumbai", "kolkata", "london", "france", "belize", "tahoe", "dubai", "abu dhabi"],
-      work: ["sambanova", "board", "meeting", "conference", "presentation", "executive", "speaking", "panel", "offsite", "readout", "summit", "hackathon", "class", "elOn", "company", "work", "morae", "icri", "icai", "ravis", "ravis starts"],
-      family: ["family", "graduation", "birthday", "bday", "wedding", "dinner", "lake house", "kids", "nina", "ravi", "molly", "beth", "sushama", "papa", "benji", "home", "weekend", "patriots", "ingle", "husband", "wife", "son", "daughter"],
-      special: ["special", "surgery", "wedding", "celebration", "anniversary", "graduation", "holiday", "break"]
+      work: ["sambanova", "board", "meeting", "conference", "presentation", "executive", "speaking", "panel", "offsite", "readout", "summit", "hackathon", "class", "elon", "company", "work", "morae", "icri", "icai", "ravis starts"],
+      family: ["family", "graduation", "lake house", "kids", "nina", "ravi", "molly", "home", "weekend", "patriots", "ingle", "husband", "wife", "son", "daughter"],
+      special: ["special", "surgery", "wedding", "celebration", "anniversary", "graduation", "holiday", "break"],
+      extended: ["beth", "sushama", "sandeep", "rhea", "rohan", "papa", "benji", "bday", "60th", "90th", "birthday celebration"]
     };
 
     let curYear = null;
