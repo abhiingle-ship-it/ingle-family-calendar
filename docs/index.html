@@ -573,67 +573,27 @@
 </div>
 
 <script>
-const EVENTS = [
-  // 2025
-  { date: "2025-09-25", title: "SambaNova Board Meeting", type: "work", desc: "Palo Alto. CAB meeting 8:30am–4:15pm." },
-  { date: "2025-09-26", title: "SambaNova Board Meeting – Day 2", type: "work", desc: "Palo Alto. Evening: meeting with Levo.ai in Dallas." },
-  { date: "2025-09-27", title: "Elon Family Weekend", type: "family", desc: "Fly 8:09am DFW → Greensboro 11:56am. Hyatt Place Greensboro. Convocation with Arthur Brooks." },
-  { date: "2025-09-28", title: "Elon Family Weekend", type: "family", desc: "Optional academic sessions 10am–12pm, football game 2pm, Rockapella show 8:30pm." },
-  { date: "2025-09-29", title: "Return Home + Evening Event", type: "travel", desc: "6:57am flight DFW, land 9:06am. 6pm: Suman & Tanya Chepuri's house, The Colony." },
-  { date: "2025-10-09", title: "Nina & Abhi Arrive", type: "family", desc: "Nina lands 6pm (Molly picks up). Abhi lands 10:30pm." },
-  { date: "2025-10-12", title: "Molly Departs for Seattle Hike", type: "travel", desc: "7am flight to SEA. Abhi drops her off. Hike Oct 13–16." },
-  { date: "2025-10-14", title: "Lake House", type: "family", desc: "Return from lake house with Tim for dinner." },
-  { date: "2025-10-31", title: "Hemmadis Arrive", type: "family", desc: "Land at 1:40pm. Fly home Nov 8. Diwali dinner at home." },
-  { date: "2025-11-03", title: "Belize Trip", type: "travel", desc: "Departs 12:19pm, returns 4:30pm Nov 7." },
-  { date: "2025-11-17", title: "ICAI Conference – Abhi Speaking", type: "work", desc: "Hyatt Frisco. Presentation 2–2:30pm, Panel 2:45–3:30pm." },
-  { date: "2025-11-18", title: "Abhi Speaks to Nina's Elon Class", type: "work", desc: "11:35am–12:35pm CST with Drew Peabody." },
-  { date: "2025-11-19", title: "Breakfast with David Evans & Copps", type: "work", desc: "7:30–10pm panel at Renaissance Dallas." },
-  { date: "2025-12-01", title: "Bay Area Week Starts", type: "travel", desc: "Nina 11am flight, Abhi 11:40am. Stay at Rajiv's Sunday night." },
-  { date: "2025-12-02", title: "Functional Readouts – People & Finance", type: "work", desc: "Early morning readout. Product & Engineering readout." },
-  { date: "2025-12-03", title: "Aramco Presentation", type: "work", desc: "Presenting in Bay Area to Aramco." },
-  { date: "2025-12-05", title: "All Hands – Palo Alto", type: "work", desc: "All Hands in Palo Alto." },
-  { date: "2025-12-09", title: "DC Trip – Federal Dinner", type: "travel", desc: "Fly American to DC. Sambanova Federal dinner in DC – evening." },
-  { date: "2025-12-10", title: "Sambanova Federal Summit", type: "work", desc: "DC. Fly to Houston evening." },
-  { date: "2025-12-11", title: "Houston – Board Dinner", type: "work", desc: "Evening board dinner. Morae board meeting in person." },
-  { date: "2025-12-12", title: "Morae Board Meeting", type: "work", desc: "In person in Houston. Fly to Dallas." },
-  { date: "2025-12-15", title: "SambaNova Executive Offsite", type: "work", desc: "Sunday evening flight. Offsite Mon & Tue." },
-  { date: "2026-01-05", title: "Tahoe Ski Trip", type: "travel", desc: "9am flight, land 10:38am PST. 1.5hr drive to Tahoe. Marriott Timber Lodge Jan 5–8." },
-  { date: "2026-01-20", title: "Bay Area Trip", type: "travel", desc: "9:15am flight. To Toronto Jan 23, land DFW 1/24 8pm." },
-  { date: "2026-02-14", title: "Lake House with Molly", type: "family", desc: "Scullions lake house Feb 14–15." },
-  { date: "2026-02-16", title: "SambaNova Holidays", type: "work", desc: "Feb 16–17 are SambaNova holidays. Good time for PT." },
-  { date: "2026-02-22", title: "NYC Week", type: "travel", desc: "Abhi to be in NYC this week." },
-  { date: "2026-03-27", title: "CNEXT Executive Dinner", type: "work", desc: "NYC. Beauty & Essex, 6–9pm ET." },
-  { date: "2026-03-27", title: "SambaNova Offsite", type: "work", desc: "Thursday. March 27–31." },
-  { date: "2026-04-04", title: "Abhi Flies Mumbai → Kathmandu", type: "travel", desc: "April 4th." },
-  { date: "2026-04-10", title: "Alli & Amy Visit Dallas", type: "family", desc: "April 10–12." },
-  { date: "2026-04-14", title: "Return: Kathmandu → Mumbai", type: "travel", desc: "Fly back April 14." },
-  { date: "2026-04-20", title: "Molly's Birthday", type: "special", desc: "April 20." },
-  { date: "2026-05-01", title: "Beth's Surgery", type: "special", desc: "Currently scheduled for May 1." },
-  { date: "2026-05-01", title: "Molly in Newport", type: "family", desc: "Molly in Newport end of April and first week of May." },
-  { date: "2026-05-05", title: "Middle East Trip Begins", type: "travel", desc: "Abhi likely in Middle East: 5th/6th through 14th." },
-  { date: "2026-05-11", title: "AI Everything Global – Abu Dhabi", type: "work", desc: "Speaking engagement, Abu Dhabi May 11–13. Must be home by 15th." },
-  { date: "2026-05-16", title: "Ravi Graduation Day", type: "special", desc: "Graduation. Airbnb reserved May 16–19." },
-  { date: "2026-05-28", title: "Abhi Flies to Bay Area", type: "travel", desc: "Abhi to Bay Area May 28. Molly flies in May 29." },
-  { date: "2026-06-03", title: "Molly Needs Hotel", type: "family", desc: "Molly will need a hotel room night of June 3rd." },
-  { date: "2026-06-08", title: "Molly Flies Back", type: "travel", desc: "Molly flies back June 8." },
-  { date: "2026-06-15", title: "Abhi Has SambaNova Board Meeting", type: "work", desc: "Abhi has a SambaNova board meeting on the 15th of June." },
-  { date: "2026-06-15", title: "Abhi Flies Back", type: "travel", desc: "Abhi flies back likely in the evening of the 15th or the morning of the 16th of June." },
-  { date: "2026-06-15", title: "Ravi Gets Back to Dallas", type: "family", desc: "Ravi gets back to Dallas on June 15th (Monday) in the evening." },
-  { date: "2026-06-18", title: "Austin Trip", type: "travel", desc: "Leave for Austin June 18 (Thursday). Return Sunday night June 21." },
-  { date: "2026-06-22", title: "Ravi Starts Work", type: "work", desc: "Ravi starts work June 22 – Monday." },
-  { date: "2026-07-06", title: "France Trip", type: "travel", desc: "Abhi likely in France July 6th to 9th." },
-  { date: "2026-07-24", title: "Depart for London – UK Trip", type: "travel", desc: "DFW 5:45pm flight, land London 9am July 25 (Saturday)." },
-  { date: "2026-07-25", title: "Sushama's 60th + Papa's 90th Birthday", type: "special", desc: "July 25–28 celebrations in UK." },
-  { date: "2026-08-03", title: "Return from London", type: "travel", desc: "9am flight, land DFW 1pm Monday August 3rd." },
-  { date: "2026-08-15", title: "Nina Flies Home", type: "family", desc: "Nina flies home weekend of August 15th." },
-  { date: "2026-08-24", title: "Nina Classes Start", type: "special", desc: "Nina classes start August 24." },
-  { date: "2026-09-25", title: "Elon Family Weekend", type: "family", desc: "Friday Sept 25 through Sunday Sept 27." },
-  { date: "2026-10-14", title: "Elon Fall Break", type: "family", desc: "Begins after evening classes Oct 14. Ends 8am Oct 19." },
-  { date: "2026-11-20", title: "Thanksgiving Break", type: "family", desc: "Begins after evening classes Nov 20. Ends 8am Nov 30." },
-  { date: "2026-12-07", title: "Nina's Exams", type: "special", desc: "Dec 7–11 are Nina's exams." },
-  { date: "2026-12-12", title: "Nina May Come Home", type: "family", desc: "Nina may come home after Dec 12." },
-  { date: "2027-04-09", title: "Eastern Europe Trip", type: "travel", desc: "Out for Eastern European trip April 9–25." },
-  { date: "2027-07-25", title: "Sushama's Birthday", type: "special", desc: "July 25th–28th." },
+let EVENTS = [
+  // 2026 events below are from the Google Doc (pre-OLD_STUFF section, May 2026 onward)
+  // Events before May 2026 were from the OLD STUFF section and are no longer included.
+  { date: "2026-05-11", title: "Speaking engagement in Abu Dhabi: AI everything Global May 11-13th, 2026.", type: "work", desc: "Abhi to fly there early to do Middle east trip customer before the conference since I have to be home by the 15th latest since I fly to NC for Ravi graduation on the 16th." },
+  { date: "2026-05-19", title: "Airbnb reserved from 16-19th of May", type: "travel", desc: "" },
+  { date: "2026-05-27", title: "Abhi to fly to Bay area May 27th.   MOlly to fly to bay area - 29th of May.", type: "travel", desc: "" },
+  { date: "2026-05-30", title: "Abhi to go for Saturday morning May 30th at 9:30 am", type: "family", desc: "" },
+  { date: "2026-06-08", title: "Molly flies back the 8th of June;", type: "travel", desc: "" },
+  { date: "2026-06-15", title: "Abhi has a SambaNova board meeting on the 15th of June", type: "work", desc: "" },
+  { date: "2026-06-15", title: "Abhi flies back likely in the evening of the 15th or the morning of the 16th of June.", type: "travel", desc: "" },
+  { date: "2026-06-15", title: "Ravi gets back to Dallas on June 15th (monday) in the evening.    We will leave the kids in a", type: "family", desc: "" },
+  { date: "2026-07-06", title: "Abhi will likely be in France -  July 6th to 9th?", type: "travel", desc: "" },
+  { date: "2026-07-24", title: "July 24th (Friday) - We leave from DFW at a 5:45 pm flight and land in london at", type: "travel", desc: "" },
+  { date: "2026-07-25", title: "July 25th-28th - Sushama 60th bday and Papa 90th bday", type: "special", desc: "" },
+  { date: "2026-08-15", title: "Nina flies home weekend of August 15th.", type: "family", desc: "" },
+  { date: "2026-08-24", title: "Nina classes start on August 24th", type: "special", desc: "" },
+  { date: "2026-09-25", title: "Elon University's Family Weekend in 2026 is scheduled for Friday, September 25 t", type: "family", desc: "" },
+  { date: "2026-10-14", title: "Fall break at Elon University in 2026 begins after evening classes on Wednesday,", type: "family", desc: "" },
+  { date: "2026-11-20", title: "Thanksgiving Break: Begins after evening classes on Friday, November 20, and end", type: "family", desc: "" },
+  { date: "2026-12-12", title: "Nina may come home after the 12th of December", type: "family", desc: "" },
+  { date: "2027-07-25", title: "July 25th-28th - Sushama bday", type: "special", desc: "" },
 ];
 
 const eventMap = {};
@@ -971,13 +931,15 @@ const typeKeywords = {
     const n = lines.length;
 
     for (let i = 0; i < n; i++) {
-      const raw = lines[i].trim();
+      let raw = lines[i].trim();
+      // Strip BOM (U+FEFF) that Google Docs prepends to the export
+      raw = raw.replace(/^\uFEFF/, '');
 
       // HARD STOP: Never process anything from or after the OLD STUFF section.
       // This boundary is absolute — the OLD STUFF section contains placeholder
       // entries (ljsdalkfjdsaljl, etc.) and old historical data that should
       // NOT appear in the calendar under any circumstances.
-      if (!raw || raw === "Shared Family Important Date" || raw.startsWith("===") || raw === "OLD STUFF BELOW" || raw.toUpperCase().includes("OLD STUFF")) break;
+      if (raw && raw.toUpperCase().includes("OLD STUFF")) break;
 
       // Month+Year header (e.g. "June 2026" or "September 2026")
       const monthYearMatch = raw.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i);
@@ -1015,11 +977,13 @@ const typeKeywords = {
         }
 
         if (day !== null) {
-          // Collect following lines as description until blank or next date-bearing line
+          // Collect following lines as description until a blank line (separator) or next date-bearing line
           let descLines = [];
+          let foundBlank = false;
           for (let j = i + 1; j < n; j++) {
             const next = lines[j].trim();
-            if (!next) break;
+            if (!next) { foundBlank = true; continue; } // skip leading blanks, remember we saw one
+            if (foundBlank && descLines.length > 0) break; // blank line AFTER content = end of desc
             const nm = next.match(datePat);
             if (nm && nm[1] && nm[2]) { break; } // next line starts a new date
             descLines.push(next);
