@@ -971,13 +971,15 @@ const typeKeywords = {
     const n = lines.length;
 
     for (let i = 0; i < n; i++) {
-      const raw = lines[i].trim();
+      let raw = lines[i].trim();
+      // Strip BOM (U+FEFF) that Google Docs prepends to the export
+      raw = raw.replace(/^\uFEFF/, '');
 
       // HARD STOP: Never process anything from or after the OLD STUFF section.
       // This boundary is absolute — the OLD STUFF section contains placeholder
       // entries (ljsdalkfjdsaljl, etc.) and old historical data that should
       // NOT appear in the calendar under any circumstances.
-      if (!raw || raw === "Shared Family Important Date" || raw.startsWith("===") || raw === "OLD STUFF BELOW" || raw.toUpperCase().includes("OLD STUFF")) break;
+      if (raw && raw.toUpperCase().includes("OLD STUFF")) break;
 
       // Month+Year header (e.g. "June 2026" or "September 2026")
       const monthYearMatch = raw.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i);
